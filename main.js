@@ -4,6 +4,7 @@ document.body.style.overflow = 'hidden';
 // Set the aspect ratio constant
 const aspectRatio = 4;
 const spriteSize = 16; // Base size of the sprite
+const borderSize = 20;
 
 // Create a function to set up a canvas
 function createCanvas(width, height, bgColor, positionTop, positionLeft) {
@@ -22,48 +23,55 @@ function createCanvas(width, height, bgColor, positionTop, positionLeft) {
   return canvas;
 }
 
-// Load the image and adjust the canvas sizes accordingly
-const image = new Image();
-image.src = 'world1-1.png'; // Update with the image path
+// Load the world image and adjust the canvas sizes accordingly
+const worldImage = new Image();
+worldImage.src = 'world1-1.png'; // Update with the image path
 
-image.onload = () => {
+// Load the Mario image
+const marioImage = new Image();
+marioImage.src = 'mario.png'; // Update with the Mario image path
+
+worldImage.onload = () => {
   // Crop the image to half its height minus spriteSize pixels
-  const croppedHeight = image.height / 2 - spriteSize; // this is good
-  const originalWidth = image.width;
+  const croppedHeight = worldImage.height / 2 - spriteSize; // this is good
+  const originalWidth = worldImage.width;
 
   // Scale the cropped height and the original width to fill the world canvas
   const scaledHeight = croppedHeight * aspectRatio;
   const scaledWidth = originalWidth * aspectRatio;
 
   // Set the world canvas dimensions
-  const worldCanvasWidth = scaledWidth;
-  const worldCanvasHeight = scaledHeight;
+  const worldCanvasWidth = scaledWidth + 2 * borderSize;
+  const worldCanvasHeight = scaledHeight + 2 * borderSize;
 
   // Set up the black world background canvas (scaled size)
-  const worldCanvas = createCanvas(image.width * aspectRatio + 20, image.height * (aspectRatio / 2) - spriteSize, 'black', 0, 0);
+  const worldCanvas = createCanvas(worldCanvasWidth, worldCanvasHeight, 'black', 0, 0);
 
   // Set up the canvas to draw the cropped and scaled image
-  const imageCanvas = createCanvas(scaledWidth, scaledHeight, 'transparent', 20, 20);
+  const imageCanvas = createCanvas(scaledWidth, scaledHeight, 'transparent', borderSize, borderSize);
 
   // Draw the cropped and scaled image onto the canvas
   const imageCtx = imageCanvas.getContext('2d');
   imageCtx.drawImage(
-    image,                       // Source image
-    0, 0,                        // Source x, y (start from the top-left of the image)
-    originalWidth, croppedHeight,  // Source width, height (full width, cropped height)
-    0, 0,                        // Destination x, y (start at the top-left of the canvas)
-    scaledWidth, scaledHeight    // Destination width, height (scaled width and height)
+    worldImage,                       // Source image
+    0, 0,                             // Source x, y (start from the top-left of the image)
+    originalWidth, croppedHeight,     // Source width, height (full width, cropped height)
+    0, 0,                             // Destination x, y (start at the top-left of the canvas)
+    scaledWidth, scaledHeight         // Destination width, height (scaled width and height)
   );
 
   // Draw the red rectangle outline
-  const rectX = image.height - spriteSize * aspectRatio; // X position of the rectangle
+  const rectX = worldImage.height - spriteSize * aspectRatio; // X position of the rectangle
   const rectWidth = 69 * spriteSize * aspectRatio;
   const rectHeight = spriteSize * aspectRatio;
 
   // Call the function with the image context and aspect ratio
-  drawRectangles(imageCtx, aspectRatio);
+  drawGround(imageCtx, aspectRatio);
 
-  console.log(scaledHeight - rectHeight);
+  // Draw the Mario image when it's loaded
+  marioImage.onload = () => {
+    mario(imageCtx, aspectRatio);
+  };
 
   // Variables to track the current position of the canvases
   let canvasX = 0;
@@ -77,20 +85,22 @@ image.onload = () => {
     }
 
     // Ensure the canvases stay within the bounds of the world canvas
-    canvasX = Math.max(window.innerWidth - worldCanvas.width, Math.min(0, canvasX));
+    const maxCanvasX = 0;
+    const minCanvasX = window.innerWidth - worldCanvasWidth;
+
+    canvasX = Math.max(minCanvasX, Math.min(maxCanvasX, canvasX));
 
     // Update the position of both canvases
     worldCanvas.style.left = `${canvasX}px`;
-    imageCanvas.style.left = `${canvasX}px`; // Image remains aligned within the world canvas
+    imageCanvas.style.left = `${canvasX + borderSize}px`; // Image remains aligned within the world canvas
   });
 };
 
-
 // Function to draw rectangles from Tiled data
-function drawRectangles(imageCtx, aspectRatio) {
-
+function drawGround(imageCtx, aspectRatio) {
   imageCtx.strokeStyle = 'red';
   imageCtx.lineWidth = 2; // Set the border width
+
   // Array of Tiled data inside the function
   const tiledDataArray = [
     {
@@ -150,3 +160,28 @@ function drawRectangles(imageCtx, aspectRatio) {
   });
 }
 
+function mario(imageCtx, aspectRatio) {
+  // Source rectangle (portion of the image to draw)
+  const sourceX = 0; // Starting x-coordinate of the source rectangle
+  const sourceY = 8; // Starting y-coordinate of the source rectangle
+  const sourceWidth = spriteSize; // Width of the source rectangle
+  const sourceHeight = spriteSize; // Height of the source rectangle
+
+  // Destination rectangle (where to draw on the canvas)
+  const destX = 50; // Destination x-coordinate on the canvas
+  const destY = 50; // Destination y-coordinate on the canvas
+  const destWidth = spriteSize * aspectRatio; // Width of the destination rectangle (scaled)
+  const destHeight = spriteSize * aspectRatio; // Height of the destination rectangle (scaled)
+
+  imageCtx.strokeStyle = 'red';
+  imageCtx.lineWidth = 2; // Set the border width
+  imageCtx.drawImage(
+    marioImage,         // Source image
+    sourceX, sourceY,   // Source x, y (start of the 16x16 sprite)
+    sourceWidth, sourceHeight,  // Source width, height (size of the 16x16 sprite)
+    destX, destY,       // Destination x, y (position on the canvas)
+    destWidth, destHeight // Destination width, height (scaled size on the canvas)
+  );
+
+  imageCtx.strokeRect(destX, destY, destWidth, destHeight);
+}
