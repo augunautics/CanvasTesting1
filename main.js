@@ -1,50 +1,47 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+document.addEventListener('DOMContentLoaded', () => {
+  // Set up the container
+  const container = document.getElementById('canvasContainer');
+  container.style.position = 'relative';
+  container.style.width = '100%';
+  container.style.height = '100%';
+  container.style.backgroundColor = 'white';
 
-let canvasWidth = 2000; // Set a large width to enable scrolling
-const canvasHeight = 600; // Fixed height of the canvas
+  // Create the canvas
+  const canvas = document.createElement('canvas');
+  canvas.id = 'myCanvas';
+  canvas.width = 1000; // Set initial width based on the window size
+  canvas.height = 400 * (canvas.width / 1000); // Scale height based on initial aspect ratio
+  canvas.style.backgroundColor = 'blue';
+  canvas.style.position = 'absolute';
+  canvas.style.left = '0';
+  canvas.style.top = '0';
+  canvas.style.width = `${canvas.width}px`; // Set CSS width
+  canvas.style.height = `${canvas.height}px`; // Set CSS height
 
-let scrollX = 0; // Initial scroll position
+  // Append the canvas to the container
+  container.appendChild(canvas);
 
-// Resize the canvas to fit the window width while maintaining the fixed height
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = canvasHeight; // Keeping height constant
+  // Initialize variables to track width changes
+  let lastWidth = window.innerWidth;
 
-  draw(); // Redraw the canvas upon resizing
-}
+  // Handle window resizing
+  document.addEventListener('DOMContentLoaded', () => {
+    let lastWidth = window.innerWidth;  // Store the initial width of the window
 
-// Draw everything on the canvas
-function draw() {
-  ctx.setTransform(1, 0, 0, 1, -scrollX, 0); // Translate canvas based on scrollX
+    window.addEventListener('resize', () => {
+        let currentWidth = window.innerWidth; // Get the current width of the window
+        let widthChange = currentWidth - lastWidth; // Calculate the change in width
+        
+        // Update the canvas dimensions based on the change
+        canvas.width += widthChange;
+        canvas.height = 400 * (canvas.width / 1000); // Adjust height to maintain the aspect ratio
+        
+        // Update the CSS styles to reflect new dimensions
+        canvas.style.width = `${canvas.width}px`;
+        canvas.style.height = `${canvas.height}px`;
 
-  // Clear the canvas
-  ctx.clearRect(scrollX, 0, canvas.width + scrollX, canvas.height);
+        lastWidth = currentWidth; // Update lastWidth to the current width for the next resize event
+    });
+});
 
-  // Draw blue background over the entire canvas width
-  ctx.fillStyle = 'blue';
-  ctx.fillRect(0, 0, canvasWidth, canvas.height);
-
-  // Draw a red box that scales with the canvas height
-  const scaleFactor = canvas.height / canvasHeight; // Scale factor based on height
-  ctx.fillStyle = 'red';
-  ctx.fillRect(10, 10, 16 * scaleFactor, 16 * scaleFactor); // Scaled 16x16 red box
-}
-
-// Event listener for keyboard input to handle left and right scrolling
-function handleKeyDown(event) {
-  const speed = 30; // Speed of scrolling
-  if (event.key === 'ArrowRight') {
-    scrollX = Math.min(scrollX + speed, canvasWidth - window.innerWidth);
-  } else if (event.key === 'ArrowLeft') {
-    scrollX = Math.max(scrollX - speed, 0);
-  }
-  draw(); // Redraw the canvas with the new scroll position
-}
-
-// Attach event listeners
-window.addEventListener('resize', resizeCanvas);
-window.addEventListener('keydown', handleKeyDown);
-
-// Initial setup and draw
-resizeCanvas();
+});
