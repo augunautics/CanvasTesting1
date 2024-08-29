@@ -1,4 +1,5 @@
 import Mario from './Mario.js';
+import Ground from './Ground.js';
 
 // Disable all scrollbars
 document.body.style.overflow = 'hidden';
@@ -67,8 +68,8 @@ worldImage.onload = () => {
   const rectWidth = 69 * spriteSize * aspectRatio;
   const rectHeight = spriteSize * aspectRatio;
 
-  // Call the function with the image context and aspect ratio
-  drawGround(imageCtx, aspectRatio);
+  const ground = new Ground(imageCtx, aspectRatio);
+  ground.draw();
 
   const marioImage = new Image();
   marioImage.src = 'mario.png'; // Update with the Mario image path
@@ -100,68 +101,3 @@ worldImage.onload = () => {
     imageCanvas.style.left = `${canvasX + borderSize}px`; // Image remains aligned within the world canvas
   });
 };
-
-// Function to draw rectangles from Tiled data
-function drawGround(imageCtx, aspectRatio) {
-  imageCtx.strokeStyle = 'red';
-  imageCtx.lineWidth = 2; // Set the border width
-
-  // Array of Tiled data inside the function
-  const tiledDataArray = [
-    {
-      height: 16,
-      id: 5,
-      name: "",
-      rotation: 0,
-      type: "",
-      visible: true,
-      width: 1104,
-      x: 0,
-      y: 208
-    },
-    {
-      height: 16,
-      id: 6,
-      name: "",
-      rotation: 0,
-      type: "",
-      visible: true,
-      width: 240,
-      x: 1136,
-      y: 208
-    },
-    {
-      height: 16,
-      id: 7,
-      name: "",
-      rotation: 0,
-      type: "",
-      visible: true,
-      width: 1024,
-      x: 1424,
-      y: 208
-    },
-    {
-      height: 16,
-      id: 8,
-      name: "",
-      rotation: 0,
-      type: "",
-      visible: true,
-      width: 896,
-      x: 2480,
-      y: 208
-    }
-  ];
-
-  // Iterate over the data to draw each rectangle
-  tiledDataArray.forEach(tiledData => {
-    imageCtx.strokeRect(
-      tiledData.x * aspectRatio,
-      tiledData.y * aspectRatio,
-      tiledData.width * aspectRatio,
-      tiledData.height * aspectRatio
-    ); // Draw the outline of the rectangle at the position and size based on the Tiled data
-  });
-}
-
