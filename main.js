@@ -1,3 +1,5 @@
+import Mario from './Mario.js';
+
 // Disable all scrollbars
 document.body.style.overflow = 'hidden';
 
@@ -68,9 +70,12 @@ worldImage.onload = () => {
   // Call the function with the image context and aspect ratio
   drawGround(imageCtx, aspectRatio);
 
-  // Draw the Mario image when it's loaded
+  const marioImage = new Image();
+  marioImage.src = 'mario.png'; // Update with the Mario image path
+  
   marioImage.onload = () => {
-    mario(imageCtx, aspectRatio);
+      const mario = new Mario(imageCtx, aspectRatio, marioImage);
+      mario.draw();
   };
 
   // Variables to track the current position of the canvases
@@ -160,28 +165,3 @@ function drawGround(imageCtx, aspectRatio) {
   });
 }
 
-function mario(imageCtx, aspectRatio) {
-  // Source rectangle (portion of the image to draw)
-  const sourceX = 0; // Starting x-coordinate of the source rectangle
-  const sourceY = 8; // Starting y-coordinate of the source rectangle
-  const sourceWidth = spriteSize; // Width of the source rectangle
-  const sourceHeight = spriteSize; // Height of the source rectangle
-
-  // Destination rectangle (where to draw on the canvas)
-  const destX = 50; // Destination x-coordinate on the canvas
-  const destY = 50; // Destination y-coordinate on the canvas
-  const destWidth = spriteSize * aspectRatio; // Width of the destination rectangle (scaled)
-  const destHeight = spriteSize * aspectRatio; // Height of the destination rectangle (scaled)
-
-  imageCtx.strokeStyle = 'red';
-  imageCtx.lineWidth = 2; // Set the border width
-  imageCtx.drawImage(
-    marioImage,         // Source image
-    sourceX, sourceY,   // Source x, y (start of the 16x16 sprite)
-    sourceWidth, sourceHeight,  // Source width, height (size of the 16x16 sprite)
-    destX, destY,       // Destination x, y (position on the canvas)
-    destWidth, destHeight // Destination width, height (scaled size on the canvas)
-  );
-
-  imageCtx.strokeRect(destX, destY, destWidth, destHeight);
-}
