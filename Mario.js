@@ -1,29 +1,40 @@
-export default class Mario {
-    constructor(imageCtx, aspectRatio, marioImage) {
-        this.imageCtx = imageCtx;
-        this.aspectRatio = aspectRatio;
-        this.spriteSize = 16; // As defined in main.js
-        this.sourceX = 0; // Starting x-coordinate of the source rectangle
-        this.sourceY = 8; // Starting y-coordinate of the source rectangle
-        this.destX = 50; // Destination x-coordinate on the canvas
-        this.destY = 50; // Destination y-coordinate on the canvas
-        this.marioImage = marioImage; // The image of Mario passed to the constructor
+import Entity from './Entity.js';
+
+export default class Mario extends Entity {
+    constructor(imageCtx, aspectRatio, marioImage, worldCanvas, startX, startY) {
+        super(imageCtx, aspectRatio, 16, startX, startY, marioImage);
+        this.worldCanvas = worldCanvas;  // Assign worldCanvas here
+        this.sourceX = 0;
+        this.sourceY = 8;
     }
 
-    draw() {
-        const sourceWidth = this.spriteSize; // Width of the source rectangle
-        const sourceHeight = this.spriteSize; // Height of the source rectangle
-        const destWidth = this.spriteSize * this.aspectRatio; // Width of the destination rectangle (scaled)
-        const destHeight = this.spriteSize * this.aspectRatio; // Height of the destination rectangle (scaled)
+    draw(sourceX, sourceY) {
+        const sourceWidth = this.spriteSize;
+        const sourceHeight = this.spriteSize;
+        const destWidth = this.spriteSize * this.aspectRatio;
+        const destHeight = this.spriteSize * this.aspectRatio;
 
-        this.imageCtx.strokeStyle = 'red';
-        this.imageCtx.lineWidth = 2;
+        // Clear the canvas before drawing
+        this.imageCtx.clearRect(0, 0, this.imageCtx.canvas.width, this.imageCtx.canvas.height);
+
+        // Redraw the entire background before drawing Mario
+        this.worldCanvas.drawWorldImage();  // Now this should work
+
+        // Draw Mario
         this.imageCtx.drawImage(
-            this.marioImage,
-            this.sourceX, this.sourceY,
+            this.image,
+            sourceX, sourceY,
             sourceWidth, sourceHeight,
             this.destX, this.destY,
             destWidth, destHeight
         );
+    }
+
+    start() {
+        const updateLoop = () => {
+            this.update(this.sourceX, this.sourceY);
+            requestAnimationFrame(updateLoop);
+        };
+        updateLoop();
     }
 }
