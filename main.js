@@ -36,7 +36,7 @@ Promise.all([
     // Calculate the ground's y-coordinate for collision detection
     const groundY = worldCanvas.getImageContext().canvas.height - 48; // Adjust based on ground's height
     mario = new Mario(worldCanvas.getImageContext(), aspectRatio, marioImage, worldCanvas, 50, 50);
-    mario.setGroundLevel(groundY);
+    mario.setGroundLevel(ground);
     mario.start();
 
     // Game loop is automatically managed by Mario's start method
