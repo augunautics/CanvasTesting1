@@ -1,17 +1,24 @@
+import Transparency from './Transparency.js';
+import Constants from './Constants.js';
+
 export default class Entity {
-    constructor(imageCtx, aspectRatio, spriteSize, startX, startY, image) {
+    constructor(imageCtx, aspectRatio, startX, startY, image, worldCanvas) {
         this.imageCtx = imageCtx;
         this.aspectRatio = aspectRatio;
-        this.spriteSize = spriteSize;
+        this.spriteSize = Constants.spriteSize;  // Use the constant from the Constants class
         this.destX = startX;
         this.destY = startY;
         this.image = image;
+        this.worldCanvas = worldCanvas;
 
         // Gravity-related properties
-        this.velocityY = 0;
-        this.gravity = 0.5;
-        this.groundLevel = null; // Initialize groundLevel to null
+        this.velocityY = Constants.velocityY;  // Use the constant for initial velocity
+        this.gravity = Constants.gravity;      // Use the constant for gravity
+        this.groundLevel = null;               // Initialize groundLevel to null
         this.isOnGround = false;
+
+        // Initialize the Transparency class
+        this.transparency = new Transparency(image, this.spriteSize, 0, 8, worldCanvas, imageCtx);
     }
 
     applyGravity() {
@@ -26,28 +33,21 @@ export default class Entity {
                     this.destY = this.groundLevel - this.spriteSize * this.aspectRatio; // Align with ground
                     this.velocityY = 0; // Stop falling
                     this.isOnGround = true;
-                    console.log("Mario has collided with the ground and stopped falling.");
+                    console.log("Entity has collided with the ground and stopped falling.");
                 }
             }
         } else {
-            // Force Mario to stay at the ground level after collision
+            // Force the entity to stay at the ground level after collision
             this.destY = this.groundLevel - this.spriteSize * this.aspectRatio;
         }
     }
 
-    draw(sourceX, sourceY) {
-        const sourceWidth = this.spriteSize;
-        const sourceHeight = this.spriteSize;
+    draw() {
         const destWidth = this.spriteSize * this.aspectRatio;
         const destHeight = this.spriteSize * this.aspectRatio;
 
-        this.imageCtx.drawImage(
-            this.image,
-            sourceX, sourceY,
-            sourceWidth, sourceHeight,
-            this.destX, this.destY,
-            destWidth, destHeight
-        );
+        // Use the Transparency class to render the entity with transparency applied
+        this.transparency.renderToCanvas(this.destX, this.destY, destWidth, destHeight);
     }
 
     update(sourceX, sourceY) {
@@ -58,15 +58,15 @@ export default class Entity {
     setGroundLevel(ground) {
         let closestGround = null;
         let minDistance = Infinity;
-    
-        // Loop through all ground tiles to find the closest one below Mario
+
+        // Loop through all ground tiles to find the closest one below the entity
         for (let tiledData of ground.tiledDataArray) {
             const groundTopY = tiledData.y * this.aspectRatio;
             const groundBottomY = groundTopY + tiledData.height * this.aspectRatio;
-    
-            // Check if Mario is above the current tile (considering its x and width)
+
+            // Check if the entity is above the current tile (considering its x and width)
             if (this.destX >= tiledData.x * this.aspectRatio && this.destX <= (tiledData.x + tiledData.width) * this.aspectRatio) {
-                // Check if the ground is directly below Mario and find the closest one
+                // Check if the ground is directly below the entity and find the closest one
                 if (this.destY + this.spriteSize * this.aspectRatio <= groundBottomY) {
                     const distance = groundTopY - (this.destY + this.spriteSize * this.aspectRatio);
                     if (distance >= 0 && distance < minDistance) {
@@ -76,19 +76,18 @@ export default class Entity {
                 }
             }
         }
-    
+
         // Set groundLevel based on the closest ground tile
         if (closestGround) {
             this.groundLevel = closestGround.y * this.aspectRatio;
             console.log(`Setting Ground Level to: ${this.groundLevel} based on closest ground tile.`);
         } else {
-            console.log('No ground tile found directly below Mario.');
+            console.log('No ground tile found directly below the entity.');
             this.groundLevel = null; // No ground found, so set groundLevel to null
         }
-    
+
         this.isOnGround = false; // Reset the flag when ground level is set
     }
-    
 
     start(sourceX, sourceY) {
         const updateLoop = () => {
