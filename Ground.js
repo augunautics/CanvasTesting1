@@ -11,10 +11,10 @@ export default class Ground {
     }
 
     draw() {
-        this.imageCtx.strokeStyle = 'red';
-        this.imageCtx.lineWidth = 2; // Set the border width
+        this.imageCtx.strokeStyle = 'red';  // Set the border color to red
+        this.imageCtx.lineWidth = 2;        // Set the border width
 
-        // Iterate over the data to draw each rectangle
+        // Iterate over the data to draw each rectangle with the red border
         this.tiledDataArray.forEach(tiledData => {
             this.imageCtx.strokeRect(
                 tiledData.x * this.aspectRatio,
